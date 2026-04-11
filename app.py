@@ -9,12 +9,34 @@ file = st.file_uploader("파일 선택", type=["xlsx"])
 
 if file:
     df = pd.read_excel(file)
-    st.write("데이터 미리보기")
+
+    st.success("업로드 완료!")
+
+    st.write("📋 데이터 미리보기")
     st.dataframe(df)
 
-    if "두께" in df.columns:
-        mean = df["두께"].mean()
-        std = df["두께"].std()
+    # 첫 번째 컬럼 자동 선택
+    col = df.columns[0]
 
-        st.write(f"평균: {mean:.2f}")
-        st.write(f"표준편차: {std:.2f}")
+    mean = df[col].mean()
+    std = df[col].std()
+
+    st.write(f"📈 평균: {mean:.2f}")
+    st.write(f"📉 표준편차: {std:.4f}")
+
+      # Spec 입력
+lsl = st.number_input("LSL (하한)", value=10.0)
+usl = st.number_input("USL (상한)", value=20.0)
+
+# Cp / Cpk 계산
+cp = (usl - lsl) / (6 * std)
+cpk = min((usl - mean) / (3 * std), (mean - lsl) / (3 * std))
+
+st.write(f"📊 Cp: {cp:.3f}")
+st.write(f"📊 Cpk: {cpk:.3f}")
+
+# 판정
+if cpk >= 1.33:
+    st.success("✅ 공정 양호 (OK)")
+else:
+    st.error("🚨 공정 불량 위험 (NG)") 
